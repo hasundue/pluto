@@ -83,7 +83,7 @@ bcs = [
 
 # ╔═╡ 25ad6ce3-86fc-478f-b957-66857422e2b9
 domains = [t ∈ (0.0, 1.0),
-		   x ∈ (0.0, 1.0)]
+           x ∈ (0.0, 1.0)]
 
 # ╔═╡ 1b5c9ffb-70d5-45d8-9042-4892df89008c
 @named pde = PDESystem(expand_derivatives.(eqs), bcs, domains, [t,x], [c(t,x), s(t,x), u(t,x)]);
