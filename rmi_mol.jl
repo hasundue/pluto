@@ -108,7 +108,7 @@ sol = solve(prob, Tsit5());
 	M = length(xs)
 
 	layout := @layout [c s
-					   u u]
+                           u u]
 
 	tout = collect(0:0.2:1)
 	for i in 1:N
