@@ -8,10 +8,22 @@ using InteractiveUtils
 begin
     import Pkg
     Pkg.activate(mktempdir())
-    Pkg.add([
-        Pkg.PackageSpec(url="https://github.com/SciML/MethodOfLines.jl"),
-    ])
-    using MethodOfLines
+
+    # Registered packages
+    pkagnames = ["ModelingToolkit",
+		 "OrdinaryDiffEq",
+		 "SpecialFunctions",
+		 "Plots",
+		 "Printf",
+		 "RecipesBase"]
+    pkgspecs = [Pkg.PackageSpec(name = pkgname) for pkgname in pkgnames]
+    Pkg.add(pkgspecs)
+
+    # Unregistered packages
+    Pkg.add(Pkg.PackageSpec(url="https://github.com/SciML/MethodOfLines.jl"))
+
+    using ModelingToolkit, SpecialFunctions, MethodOfLines, OrdinaryDiffEq
+    using Plots, RecipesBase, Printf
 end
 
 # ╔═╡ 399ec6dc-6f4f-11ec-23c4-331cf4fdf13e
