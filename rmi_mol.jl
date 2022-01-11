@@ -4,6 +4,28 @@
 using Markdown
 using InteractiveUtils
 
+# ╔═╡ 421056b1-5fd8-4a43-b9f9-29ab6655f01e
+begin
+    import Pkg
+    Pkg.activate(mktempdir())
+
+    # Registered packages
+    pkgnames = ["ModelingToolkit",
+		 "OrdinaryDiffEq",
+		 "SpecialFunctions",
+		 "Plots",
+		 "Printf",
+		 "RecipesBase"]
+    pkgspecs = [Pkg.PackageSpec(name = pkgname) for pkgname in pkgnames]
+    Pkg.add(pkgspecs)
+
+    # Unregistered packages
+    Pkg.add(Pkg.PackageSpec(url="https://github.com/SciML/MethodOfLines.jl"))
+
+    using ModelingToolkit, SpecialFunctions, MethodOfLines, OrdinaryDiffEq
+    using Plots, RecipesBase, Printf
+end
+
 # ╔═╡ 43cd59d9-ad46-42d7-a7ba-443a2bd4f8de
 @parameters t x
 
@@ -126,31 +148,6 @@ end
 # ╔═╡ eac0b5d5-866d-4a59-b33a-e81eb5c11a4e
 plot(0:dx:1, sol)
 
-# ╔═╡ 60efe4f1-c5f5-48bd-a79a-9cb7b5e85b7a
-using SpecialFunctions
-
-# ╔═╡ 421056b1-5fd8-4a43-b9f9-29ab6655f01e
-begin
-    import Pkg
-    Pkg.activate(mktempdir())
-
-    # Registered packages
-    pkagnames = ["ModelingToolkit",
-		 "OrdinaryDiffEq",
-		 "SpecialFunctions",
-		 "Plots",
-		 "Printf",
-		 "RecipesBase"]
-    pkgspecs = [Pkg.PackageSpec(name = pkgname) for pkgname in pkgnames]
-    Pkg.add(pkgspecs)
-
-    # Unregistered packages
-    Pkg.add(Pkg.PackageSpec(url="https://github.com/SciML/MethodOfLines.jl"))
-
-    using ModelingToolkit, SpecialFunctions, MethodOfLines, OrdinaryDiffEq
-    using Plots, RecipesBase, Printf
-end
-
 # ╔═╡ Cell order:
 # ╠═421056b1-5fd8-4a43-b9f9-29ab6655f01e
 # ╠═43cd59d9-ad46-42d7-a7ba-443a2bd4f8de
@@ -164,7 +161,6 @@ end
 # ╠═7af0447f-aca2-45b0-ac1c-5d359ec25b3a
 # ╠═85271f34-f54c-4f94-be61-46db68d4be3c
 # ╠═56c4d260-3d8d-4c83-8f5a-283878c76d9b
-# ╠═60efe4f1-c5f5-48bd-a79a-9cb7b5e85b7a
 # ╠═ca6af1e9-2bf5-4751-aa95-8b685f4bb987
 # ╠═84ff092f-bde9-4696-91c9-5a5b97a20cde
 # ╠═f9d3a857-5fca-4329-ad6e-3a0ab4a53331
