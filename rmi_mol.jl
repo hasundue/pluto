@@ -4,46 +4,6 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 421056b1-5fd8-4a43-b9f9-29ab6655f01e
-begin
-    import Pkg
-    Pkg.activate(mktempdir())
-
-    # Registered packages
-    pkagnames = ["ModelingToolkit",
-		 "OrdinaryDiffEq",
-		 "SpecialFunctions",
-		 "Plots",
-		 "Printf",
-		 "RecipesBase"]
-    pkgspecs = [Pkg.PackageSpec(name = pkgname) for pkgname in pkgnames]
-    Pkg.add(pkgspecs)
-
-    # Unregistered packages
-    Pkg.add(Pkg.PackageSpec(url="https://github.com/SciML/MethodOfLines.jl"))
-
-    using ModelingToolkit, SpecialFunctions, MethodOfLines, OrdinaryDiffEq
-    using Plots, RecipesBase, Printf
-end
-
-# ╔═╡ 399ec6dc-6f4f-11ec-23c4-331cf4fdf13e
-using ModelingToolkit, OrdinaryDiffEq
-
-# ╔═╡ d98a7cf9-3bd7-4087-9104-aac7b5941fa6
-using ModelingToolkit: Differential
-
-# ╔═╡ 60efe4f1-c5f5-48bd-a79a-9cb7b5e85b7a
-using SpecialFunctions
-
-# ╔═╡ 8630efa7-50be-4c69-8861-d39bfa007107
-using Plots
-
-# ╔═╡ 6230333c-3031-4c66-80f8-6db44d67798e
-using Printf
-
-# ╔═╡ 3cc70337-d580-4d30-9e3e-29603dee6e60
-using RecipesBase
-
 # ╔═╡ 43cd59d9-ad46-42d7-a7ba-443a2bd4f8de
 @parameters t x
 
@@ -166,9 +126,32 @@ end
 # ╔═╡ eac0b5d5-866d-4a59-b33a-e81eb5c11a4e
 plot(0:dx:1, sol)
 
+# ╔═╡ 60efe4f1-c5f5-48bd-a79a-9cb7b5e85b7a
+using SpecialFunctions
+
+# ╔═╡ 421056b1-5fd8-4a43-b9f9-29ab6655f01e
+begin
+    import Pkg
+    Pkg.activate(mktempdir())
+
+    # Registered packages
+    pkagnames = ["ModelingToolkit",
+		 "OrdinaryDiffEq",
+		 "SpecialFunctions",
+		 "Plots",
+		 "Printf",
+		 "RecipesBase"]
+    pkgspecs = [Pkg.PackageSpec(name = pkgname) for pkgname in pkgnames]
+    Pkg.add(pkgspecs)
+
+    # Unregistered packages
+    Pkg.add(Pkg.PackageSpec(url="https://github.com/SciML/MethodOfLines.jl"))
+
+    using ModelingToolkit, SpecialFunctions, MethodOfLines, OrdinaryDiffEq
+    using Plots, RecipesBase, Printf
+end
+
 # ╔═╡ Cell order:
-# ╠═399ec6dc-6f4f-11ec-23c4-331cf4fdf13e
-# ╠═d98a7cf9-3bd7-4087-9104-aac7b5941fa6
 # ╠═421056b1-5fd8-4a43-b9f9-29ab6655f01e
 # ╠═43cd59d9-ad46-42d7-a7ba-443a2bd4f8de
 # ╠═ff609196-76d6-4aba-9971-81835f800271
@@ -193,8 +176,5 @@ plot(0:dx:1, sol)
 # ╠═3f2f9dba-ce74-460a-ae59-78a331de9424
 # ╠═967e96b7-b29b-480d-9383-2faf8709b13c
 # ╠═c62ef778-aa47-4079-a580-e9cb5234fe73
-# ╠═8630efa7-50be-4c69-8861-d39bfa007107
-# ╠═6230333c-3031-4c66-80f8-6db44d67798e
-# ╠═3cc70337-d580-4d30-9e3e-29603dee6e60
 # ╠═93588680-d150-47d1-8cde-8f2c39441881
 # ╠═eac0b5d5-866d-4a59-b33a-e81eb5c11a4e
