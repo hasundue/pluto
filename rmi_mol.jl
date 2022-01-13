@@ -4,12 +4,6 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ aef53a73-6a16-4259-bb35-1d9d735313a0
-md"# Mathematical modeling of reactive melt infiltration (RMI)"
-
-# ╔═╡ 8626400d-31e7-4b19-af63-47115eb893c7
-md"## Setting up Julia language"
-
 # ╔═╡ 421056b1-5fd8-4a43-b9f9-29ab6655f01e
 begin
     import Pkg
@@ -35,6 +29,12 @@ begin
     using Plots, RecipesBase, Printf, Romberg
 end
 
+# ╔═╡ aef53a73-6a16-4259-bb35-1d9d735313a0
+md"# Mathematical modeling of reactive melt infiltration (RMI)"
+
+# ╔═╡ 8626400d-31e7-4b19-af63-47115eb893c7
+md"## Setting up Julia language"
+
 # ╔═╡ bf11b1e1-0459-4c9e-b2a2-cf325f6b7552
 md"## Definition of variables and parameters"
 
@@ -45,7 +45,8 @@ md"## Definition of variables and parameters"
 # c: gas concentration
 # s: surface coverage
 # u: liquid volume fraction
-@variables c(..) s(..) u(..)
+# d: thickness of the product at liquid/substrate interface
+@variables c(..) s(..) u(..) d(..)
 
 # ╔═╡ 8c562f00-b437-4455-b3c2-a04dacb4e77f
 δ = 0.1 # thickness parameter
@@ -65,6 +66,9 @@ w = 0.3 # wettability parameter
 # ╔═╡ 56c4d260-3d8d-4c83-8f5a-283878c76d9b
 k = 10 # infiltrativity parameter
 
+# ╔═╡ f92f1115-fd00-4521-9f0b-05a5f51b386e
+D_fm = 10 # Reaction constant for FM-like reaction betwenn liquid and substrate
+
 # ╔═╡ 8a2af572-4a87-4f30-a031-56efbda43a70
 md"## Governing equations"
 
@@ -78,28 +82,34 @@ Dxx = Dx^2
 Dt = Differential(t)
 
 # ╔═╡ 84ff092f-bde9-4696-91c9-5a5b97a20cde
-ev(c, u) = v * (1-c) * u # evaporation
+ev(c, u) = v * (1-c) * u # evaporation model
 
 # ╔═╡ f9d3a857-5fca-4329-ad6e-3a0ab4a53331
-cg(c, s) = r * c * (1-s) # crystal growth
+vw(c, s) = r * c * (1-s) # VW-like crystal growth at gas/substrate interface
 
 # ╔═╡ 471e3c14-33ae-4103-8586-41385073f230
-cp(s) = 1 + erf((s-1)/w) # relative capillary pressure
+cp(s) = 1 + erf((s-1)/w) # capillary pressure model
+
+# ╔═╡ 9486d7f2-aa1a-4bdf-828d-6c4dbd1744c3
+fm(u, d) = u * D_fm / d # FM-like crystal growth at liquid/substrate interface
 
 # ╔═╡ ca6af1e9-2bf5-4751-aa95-8b685f4bb987
 eqs = [
     # Gas concentration
-    Dt(c(t,x)) ~ D * Dxx(c(t,x)) - δ * cg(c(t,x), s(t,x)) + ev(c(t,x), u(t,x)),
+    Dt(c(t,x)) ~ D * Dxx(c(t,x)) - δ * vw(c(t,x), s(t,x)) + ev(c(t,x), u(t,x)),
 
     # Surface coverage
-    Dt(s(t,x)) ~ cg(c(t,x), s(t,x)),
+    Dt(s(t,x)) ~ vw(c(t,x), s(t,x)),
 
     # Liquid volume fraction
     Dt(u(t,x)) ~ Dx(k*cp(s(t,x))*Dx(u(t,x))),
+
+    # Thickness of the product at liquid/substrate interface
+    Dt(d(t,x)) ~ fm(u(t,x), d(t,x))
 ]
 
 # ╔═╡ 59d5fcdd-28cf-44ce-8bd3-bd790c095852
-plot(cp, 0, 1, xlabel = "Surface coverage", ylabel = "Relative capillary pressure")
+plot(cp, 0, 1, xlabel = "Surface coverage", ylabel = "capillary pressure")
 
 # ╔═╡ a7599967-4633-4b2e-a355-8fcaa0446580
 md"## Boundary conditions"
@@ -112,6 +122,8 @@ bcs = [
     s(0,x) ~ 0.0,
     u(t,0) ~ 1.0,
     u(0,x) ~ 0.0,
+    d(t,0) ~ 0.0,
+    d(0,x) ~ δ,
 ]
 
 # ╔═╡ c8a0e235-9c6d-4d3d-a6c0-75a96db1139b
@@ -122,7 +134,7 @@ domains = [t ∈ (0.0, 1.0),
            x ∈ (0.0, 1.0)]
 
 # ╔═╡ 1b5c9ffb-70d5-45d8-9042-4892df89008c
-@named pde = PDESystem(expand_derivatives.(eqs), bcs, domains, [t,x], [c(t,x), s(t,x), u(t,x)]);
+@named pde = PDESystem(expand_derivatives.(eqs), bcs, domains, [t,x], [c(t,x), s(t,x), u(t,x), d(t,x)]);
 
 # ╔═╡ 4860b5f5-dcb8-40ca-b378-702bcfb40738
 dx = 0.01
@@ -147,7 +159,8 @@ md"## Plotting results"
     M = length(xs)
 
     layout := @layout [c s
-                       u l]
+                       u d
+                       l v]
 
     t_out = collect(0:0.2:1)
     ls = zeros(length(t_out))
@@ -156,24 +169,34 @@ md"## Plotting results"
         if ts[i] ≥ t_out[k]
             @series begin
                 subplot := 1
-                ylabel --> "Gas fraction"
+                ylabel --> "c"
                 xlabel --> "x"
+                ylims --> (0, 1)
                 label --> @sprintf "t = %1.1f" ts[i]
                 xs, sol.u[i][1:M]
             end
             @series begin
                 subplot := 2
-                ylabel --> "Surface coverage"
+                ylabel --> "s"
                 xlabel --> "x"
+                ylims --> (0, 1)
                 label --> @sprintf "t = %1.1f" ts[i]
                 xs, sol.u[i][M+1:2M]
             end
             @series begin
                 subplot := 3
-                ylabel --> "Liquid fraction"
+                ylabel --> "u"
                 xlabel --> "x"
+                ylims --> (0, 1)
                 label --> @sprintf "t = %1.1f" ts[i]
                 xs, sol.u[i][2M+1:3M]
+            end
+            @series begin
+                subplot := 4
+                ylabel --> "d"
+                xlabel --> "x"
+                label --> @sprintf "t = %1.1f" ts[i]
+                xs, sol.u[i][3M+1:4M]
             end
 
             # Calculate infiltration length
@@ -183,7 +206,7 @@ md"## Plotting results"
         end
     end
     @series begin
-        subplot := 4
+        subplot := 5
         ylabel --> "Infiltration length"
         xlabel --> "t"
         legend --> false
@@ -191,11 +214,10 @@ md"## Plotting results"
         t_out, ls
     end
     xlims --> (0, 1)
-    ylims --> (0, 1)
 end
 
 # ╔═╡ eac0b5d5-866d-4a59-b33a-e81eb5c11a4e
-plot(0:dx:1, sol)
+plot(0:dx:1, sol, size=(600,800))
 
 # ╔═╡ Cell order:
 # ╟─aef53a73-6a16-4259-bb35-1d9d735313a0
@@ -210,6 +232,7 @@ plot(0:dx:1, sol)
 # ╠═7af0447f-aca2-45b0-ac1c-5d359ec25b3a
 # ╠═85271f34-f54c-4f94-be61-46db68d4be3c
 # ╠═56c4d260-3d8d-4c83-8f5a-283878c76d9b
+# ╠═f92f1115-fd00-4521-9f0b-05a5f51b386e
 # ╟─8a2af572-4a87-4f30-a031-56efbda43a70
 # ╠═3b75ae00-df1a-497b-8553-cec55597fb46
 # ╠═547313be-fc25-4868-9331-428976ae14ad
@@ -218,6 +241,7 @@ plot(0:dx:1, sol)
 # ╠═84ff092f-bde9-4696-91c9-5a5b97a20cde
 # ╠═f9d3a857-5fca-4329-ad6e-3a0ab4a53331
 # ╠═471e3c14-33ae-4103-8586-41385073f230
+# ╠═9486d7f2-aa1a-4bdf-828d-6c4dbd1744c3
 # ╠═59d5fcdd-28cf-44ce-8bd3-bd790c095852
 # ╟─a7599967-4633-4b2e-a355-8fcaa0446580
 # ╠═b084b8bd-2fe6-4d38-9090-34613ef41842
