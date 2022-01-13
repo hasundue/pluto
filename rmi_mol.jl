@@ -10,12 +10,15 @@ begin
     Pkg.activate(mktempdir())
 
     # Registered packages
-    pkgnames = ["ModelingToolkit",
-                "OrdinaryDiffEq",
-                "SpecialFunctions",
-                "Plots",
-                "Printf",
-                "RecipesBase"]
+    pkgnames = [
+        "ModelingToolkit",
+        "OrdinaryDiffEq",
+        "SpecialFunctions",
+        "Plots",
+        "Printf",
+        "RecipesBase",
+        "Romberg",
+    ]
     pkgspecs = [Pkg.PackageSpec(name = pkgname) for pkgname in pkgnames]
     Pkg.add(pkgspecs)
 
@@ -23,7 +26,7 @@ begin
     Pkg.add(Pkg.PackageSpec(url="https://github.com/SciML/MethodOfLines.jl"))
 
     using ModelingToolkit, SpecialFunctions, MethodOfLines, OrdinaryDiffEq
-    using Plots, RecipesBase, Printf
+    using Plots, RecipesBase, Printf, Romberg
 end
 
 # ╔═╡ 43cd59d9-ad46-42d7-a7ba-443a2bd4f8de
@@ -108,41 +111,55 @@ prob = discretize(pde, disc)
 sol = solve(prob, Tsit5());
 
 # ╔═╡ 93588680-d150-47d1-8cde-8f2c39441881
-@recipe function plot(xs::StepRangeLen, sol::ODESolution)
+@recipe function plot(range::StepRangeLen, sol::ODESolution)
     ts = sol.t
     N = length(ts)
-    xs = collect(xs[2:end])
+    xs = collect(range[2:end])
     M = length(xs)
 
     layout := @layout [c s
-                       u u]
+                       u l]
 
-    tout = collect(0:0.2:1)
+    t_out = collect(0:0.2:1)
+    ls = zeros(length(t_out))
+    k = 1
     for i in 1:N
-        if ts[i] ≥ tout[1]
-            tout = tout[2:end]
+        if ts[i] ≥ t_out[k]
             @series begin
                 subplot := 1
-                ylabel --> "gas"
+                ylabel --> "Gas fraction"
                 xlabel --> "x"
                 label --> @sprintf "t = %1.1f" ts[i]
                 xs, sol.u[i][1:M]
             end
             @series begin
                 subplot := 2
-                ylabel --> "coverage"
+                ylabel --> "Surface coverage"
                 xlabel --> "x"
                 label --> @sprintf "t = %1.1f" ts[i]
                 xs, sol.u[i][M+1:2M]
             end
             @series begin
                 subplot := 3
-                ylabel --> "liquid"
+                ylabel --> "Liquid fraction"
                 xlabel --> "x"
                 label --> @sprintf "t = %1.1f" ts[i]
                 xs, sol.u[i][2M+1:3M]
             end
+
+            # Calculate infiltration length
+            ls[k], _ = romberg(range[2:end], sol.u[i][2M+1:3M])
+
+            k += 1
         end
+    end
+    @series begin
+        subplot := 4
+        ylabel --> "Infiltration length"
+        xlabel --> "t"
+        legend --> false
+        markershape --> :circle
+        t_out, ls
     end
     xlims --> (0, 1)
     ylims --> (0, 1)
