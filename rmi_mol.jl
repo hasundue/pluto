@@ -55,10 +55,10 @@ md"## Definition of variables and parameters"
 r = 10 # crystal growth rate
 
 # ╔═╡ 3e67f206-6c54-4406-b431-8e0dc70cc862
-v = 10 # evaporation rate
+v = 40 # evaporation rate
 
 # ╔═╡ 7af0447f-aca2-45b0-ac1c-5d359ec25b3a
-D = 0.1 # vapor diffusion coeffient
+D = 0.01 # vapor diffusion coeffient
 
 # ╔═╡ 85271f34-f54c-4f94-be61-46db68d4be3c
 w = 0.3 # wettability parameter
@@ -116,14 +116,21 @@ md"## Boundary conditions"
 
 # ╔═╡ b084b8bd-2fe6-4d38-9090-34613ef41842
 bcs = [
-    c(t,0) ~ 1.0,
     c(0,x) ~ 0.0,
-    s(t,0) ~ 1.0,
+    Dx(c(t,0)) ~ 0.0,
+    Dx(c(t,1)) ~ 0.0,
+
     s(0,x) ~ 0.0,
-    u(t,0) ~ 1.0,
+    Dx(s(t,0)) ~ 0.0,
+    Dx(s(t,1)) ~ 0.0,
+
     u(0,x) ~ 0.0,
-    d(t,0) ~ 0.0,
+    u(t,0) ~ 1.0,
+    Dx(u(t,1)) ~ 0.0,
+
     d(0,x) ~ δ,
+    Dx(d(t,0)) ~ 0.0,
+    Dx(d(t,1)) ~ 0.0,
 ]
 
 # ╔═╡ c8a0e235-9c6d-4d3d-a6c0-75a96db1139b
@@ -155,7 +162,7 @@ md"## Plotting results"
 @recipe function plot(range::StepRangeLen, sol::ODESolution)
     ts = sol.t
     N = length(ts)
-    xs = collect(range[2:end])
+    xs = collect(range[2:end-1])
     M = length(xs)
 
     layout := @layout [c s
