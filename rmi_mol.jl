@@ -138,7 +138,13 @@ domains = [t ∈ (0.0, 1.0),
                        domains, 
                        [t,x], 
                        [c(t,x), s(t,x), u(t,x), d(t,x)],
-                       [δ => 0.1, r => 10, v => 40, D => 0.01, w => 0.3, k => 10, D_fm => 10]);
+                       [δ => 0.1, # thickness of VW-like reaction
+                        r => 10, # crystal growth rate
+                        v => 40, # evaporation rate
+                        D => 0.01, # vapor diffusion coeffient
+                        w => 0.3, # wettability parameter
+                        k => 10, # permeability parameter
+                        D_fm => 10]); # Reaction constant for FM-like reaction
 
 # ╔═╡ 4860b5f5-dcb8-40ca-b378-702bcfb40738
 dx = 0.01
