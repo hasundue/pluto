@@ -49,7 +49,7 @@ md"## Definition of variables and parameters"
 @variables c(..) s(..) u(..) d(..)
 
 # ╔═╡ 8c562f00-b437-4455-b3c2-a04dacb4e77f
-δ = 0.1 # thickness parameter
+δ = 0.1 # thickness of VW-like crystals at gas/substrate interface
 
 # ╔═╡ 2bc4b9de-c5e1-4bdb-832c-f6c849b0dc3d
 r = 10 # crystal growth rate
@@ -67,7 +67,7 @@ w = 0.3 # wettability parameter
 k = 10 # infiltrativity parameter
 
 # ╔═╡ f92f1115-fd00-4521-9f0b-05a5f51b386e
-D_fm = 10 # Reaction constant for FM-like reaction betwenn liquid and substrate
+D_fm = 10 # Reaction constant for FM-like reaction at liquid/substrate interface
 
 # ╔═╡ 8a2af572-4a87-4f30-a031-56efbda43a70
 md"## Governing equations"
