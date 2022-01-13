@@ -38,6 +38,9 @@ md"## Setting up Julia language"
 # ╔═╡ bf11b1e1-0459-4c9e-b2a2-cf325f6b7552
 md"## Definition of variables and parameters"
 
+# ╔═╡ 51457f69-ed29-4969-bb80-c531ccc7c695
+md"#### Variables"
+
 # ╔═╡ 43cd59d9-ad46-42d7-a7ba-443a2bd4f8de
 @parameters t x
 
@@ -46,7 +49,10 @@ md"## Definition of variables and parameters"
 # s: surface coverage
 # u: liquid volume fraction
 # d: thickness of the product at liquid/substrate interface
-@variables c(..) s(..) u(..) d(..)
+@variables c(..) s(..) u(..) d(..) T(..)
+
+# ╔═╡ 90323a52-6ec4-45bd-9ee0-11efbab19746
+md"#### Model parameters"
 
 # ╔═╡ 8c562f00-b437-4455-b3c2-a04dacb4e77f
 # δ: thickness of VW-like crystals at vapor/substrate interface
@@ -57,6 +63,18 @@ md"## Definition of variables and parameters"
 # k: permeability parameter
 # D_fm: Reaction constant for FM-like reaction at liquid/substrate interface
 @parameters δ, r, v, D_gas, w, k, D_fm
+
+# ╔═╡ 6e282286-5366-469d-9f5f-96b85ab2f629
+md"#### Physical constants"
+
+# ╔═╡ 5b76a22f-2cd8-4402-b134-9349bd02b232
+λ_s = 0.1 # solid thermal conductivity
+
+# ╔═╡ 2ac5c5f2-9882-420a-94f3-17cc9614bf53
+λ_l = λ_s # liquid thermal conductivity
+
+# ╔═╡ e8aca2ec-14e4-4dcd-83e1-de898a312eb4
+H = 0.1 # enthalpy of reaction
 
 # ╔═╡ 8a2af572-4a87-4f30-a031-56efbda43a70
 md"## Governing equations"
@@ -82,6 +100,9 @@ cp(w, s) = 1 + erf((s-1)/w) # capillary pressure model
 # ╔═╡ 9486d7f2-aa1a-4bdf-828d-6c4dbd1744c3
 fm(u, d) = u * D_fm / d # FM-like crystal growth at liquid/substrate interface
 
+# ╔═╡ 8a706e21-9a86-45f6-b329-92f3439d44b1
+λ(u) = (1-u) * λ_s + u * λ_l # thermal conductivity
+
 # ╔═╡ ca6af1e9-2bf5-4751-aa95-8b685f4bb987
 eqs = [
     # Gas concentration
@@ -94,7 +115,10 @@ eqs = [
     Dt(u(t,x)) ~ Dx(k*cp(w, s(t,x))*Dx(u(t,x))),
 
     # Thickness of the product at liquid/substrate interface
-    Dt(d(t,x)) ~ fm(u(t,x), d(t,x))
+    Dt(d(t,x)) ~ fm(u(t,x), d(t,x)),
+
+    # Temperature
+    Dt(T(t,x)) ~ Dx(λ(u(t,x))*Dx(T(t,x))) + H * fm(u(t,x), d(t,x)),
 ]
 
 # ╔═╡ 59d5fcdd-28cf-44ce-8bd3-bd790c095852
@@ -123,6 +147,10 @@ bcs = [
     d(0,x) ~ δ,
     Dx(d(t,0)) ~ 0.0,
     Dx(d(t,1)) ~ 0.0,
+
+    T(0,x) ~ 1,
+    Dx(T(t,0)) ~ 0.0,
+    Dx(T(t,1)) ~ 0.0,
 ]
 
 # ╔═╡ c8a0e235-9c6d-4d3d-a6c0-75a96db1139b
@@ -137,7 +165,7 @@ domains = [t ∈ (0.0, 1.0),
                        bcs, 
                        domains, 
                        [t,x], 
-                       [c(t,x), s(t,x), u(t,x), d(t,x)],
+                       [c(t,x), s(t,x), u(t,x), d(t,x), T(t,x)],
                        [δ => 0.1,       # thickness of VW-like reaction
                         r => 10,        # crystal growth rate
                         v => 40,        # evaporation rate
@@ -169,8 +197,8 @@ md"## Plotting results"
     M = length(xs)
 
     layout := @layout [c s
-                       u d
-                       l v]
+                       u l
+                       d T]
 
     t_out = collect(0:0.2:1)
     ls = zeros(length(t_out))
@@ -202,11 +230,18 @@ md"## Plotting results"
                 xs, sol.u[i][2M+1:3M]
             end
             @series begin
-                subplot := 4
+                subplot := 5
                 ylabel --> "d"
                 xlabel --> "x"
                 label --> @sprintf "t = %1.1f" ts[i]
                 xs, sol.u[i][3M+1:4M]
+            end
+            @series begin
+                subplot := 6
+                ylabel --> "T"
+                xlabel --> "x"
+                label --> @sprintf "t = %1.1f" ts[i]
+                xs, sol.u[i][4M+1:5M]
             end
 
             # Calculate infiltration length
@@ -216,7 +251,7 @@ md"## Plotting results"
         end
     end
     @series begin
-        subplot := 5
+        subplot := 4
         ylabel --> "Infiltration length"
         xlabel --> "t"
         legend --> false
@@ -234,9 +269,15 @@ plot(0:dx:1, sol, size=(600,800))
 # ╟─8626400d-31e7-4b19-af63-47115eb893c7
 # ╠═421056b1-5fd8-4a43-b9f9-29ab6655f01e
 # ╟─bf11b1e1-0459-4c9e-b2a2-cf325f6b7552
+# ╟─51457f69-ed29-4969-bb80-c531ccc7c695
 # ╠═43cd59d9-ad46-42d7-a7ba-443a2bd4f8de
 # ╠═ff609196-76d6-4aba-9971-81835f800271
+# ╟─90323a52-6ec4-45bd-9ee0-11efbab19746
 # ╠═8c562f00-b437-4455-b3c2-a04dacb4e77f
+# ╟─6e282286-5366-469d-9f5f-96b85ab2f629
+# ╠═5b76a22f-2cd8-4402-b134-9349bd02b232
+# ╠═2ac5c5f2-9882-420a-94f3-17cc9614bf53
+# ╠═e8aca2ec-14e4-4dcd-83e1-de898a312eb4
 # ╟─8a2af572-4a87-4f30-a031-56efbda43a70
 # ╠═3b75ae00-df1a-497b-8553-cec55597fb46
 # ╠═547313be-fc25-4868-9331-428976ae14ad
@@ -246,6 +287,7 @@ plot(0:dx:1, sol, size=(600,800))
 # ╠═f9d3a857-5fca-4329-ad6e-3a0ab4a53331
 # ╠═471e3c14-33ae-4103-8586-41385073f230
 # ╠═9486d7f2-aa1a-4bdf-828d-6c4dbd1744c3
+# ╠═8a706e21-9a86-45f6-b329-92f3439d44b1
 # ╠═59d5fcdd-28cf-44ce-8bd3-bd790c095852
 # ╟─a7599967-4633-4b2e-a355-8fcaa0446580
 # ╠═b084b8bd-2fe6-4d38-9090-34613ef41842
