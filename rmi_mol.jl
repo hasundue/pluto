@@ -49,25 +49,14 @@ md"## Definition of variables and parameters"
 @variables c(..) s(..) u(..) d(..)
 
 # ╔═╡ 8c562f00-b437-4455-b3c2-a04dacb4e77f
-δ = 0.1 # thickness of VW-like crystals at vapor/substrate interface
-
-# ╔═╡ 2bc4b9de-c5e1-4bdb-832c-f6c849b0dc3d
-r = 10 # crystal growth rate
-
-# ╔═╡ 3e67f206-6c54-4406-b431-8e0dc70cc862
-v = 40 # evaporation rate
-
-# ╔═╡ 7af0447f-aca2-45b0-ac1c-5d359ec25b3a
-D = 0.01 # vapor diffusion coeffient
-
-# ╔═╡ 85271f34-f54c-4f94-be61-46db68d4be3c
-w = 0.3 # wettability parameter
-
-# ╔═╡ 56c4d260-3d8d-4c83-8f5a-283878c76d9b
-k = 10 # infiltrativity parameter
-
-# ╔═╡ f92f1115-fd00-4521-9f0b-05a5f51b386e
-D_fm = 10 # Reaction constant for FM-like reaction at liquid/substrate interface
+# δ: thickness of VW-like crystals at vapor/substrate interface
+# r: crystal growth rate
+# v: evaporation rate
+# D: vapor diffusion coeffient
+# w: wettability parameter
+# k: permeability parameter
+# D_fm: Reaction constant for FM-like reaction at liquid/substrate interface
+@parameters δ, r, v, D, w, k, D_fm
 
 # ╔═╡ 8a2af572-4a87-4f30-a031-56efbda43a70
 md"## Governing equations"
@@ -88,7 +77,7 @@ ev(c, u) = v * (1-c) * u # evaporation model
 vw(c, s) = r * c * (1-s) # VW-like crystal growth at vapor/substrate interface
 
 # ╔═╡ 471e3c14-33ae-4103-8586-41385073f230
-cp(s) = 1 + erf((s-1)/w) # capillary pressure model
+cp(w, s) = 1 + erf((s-1)/w) # capillary pressure model
 
 # ╔═╡ 9486d7f2-aa1a-4bdf-828d-6c4dbd1744c3
 fm(u, d) = u * D_fm / d # FM-like crystal growth at liquid/substrate interface
@@ -102,14 +91,17 @@ eqs = [
     Dt(s(t,x)) ~ vw(c(t,x), s(t,x)),
 
     # Liquid volume fraction
-    Dt(u(t,x)) ~ Dx(k*cp(s(t,x))*Dx(u(t,x))),
+    Dt(u(t,x)) ~ Dx(k*cp(w, s(t,x))*Dx(u(t,x))),
 
     # Thickness of the product at liquid/substrate interface
     Dt(d(t,x)) ~ fm(u(t,x), d(t,x))
 ]
 
 # ╔═╡ 59d5fcdd-28cf-44ce-8bd3-bd790c095852
-plot(cp, 0, 1, xlabel = "Surface coverage", ylabel = "capillary pressure")
+plot(s -> cp(0.3, s), 0, 1,
+     legend = false,
+     xlabel = "Surface coverage",
+     ylabel = "capillary pressure")
 
 # ╔═╡ a7599967-4633-4b2e-a355-8fcaa0446580
 md"## Boundary conditions"
@@ -141,7 +133,12 @@ domains = [t ∈ (0.0, 1.0),
            x ∈ (0.0, 1.0)]
 
 # ╔═╡ 1b5c9ffb-70d5-45d8-9042-4892df89008c
-@named pde = PDESystem(expand_derivatives.(eqs), bcs, domains, [t,x], [c(t,x), s(t,x), u(t,x), d(t,x)]);
+@named pde = PDESystem(expand_derivatives.(eqs), 
+                       bcs, 
+                       domains, 
+                       [t,x], 
+                       [c(t,x), s(t,x), u(t,x), d(t,x)],
+                       [δ => 0.1, r => 10, v => 40, D => 0.01, w => 0.3, k => 10, D_fm => 10]);
 
 # ╔═╡ 4860b5f5-dcb8-40ca-b378-702bcfb40738
 dx = 0.01
@@ -234,12 +231,6 @@ plot(0:dx:1, sol, size=(600,800))
 # ╠═43cd59d9-ad46-42d7-a7ba-443a2bd4f8de
 # ╠═ff609196-76d6-4aba-9971-81835f800271
 # ╠═8c562f00-b437-4455-b3c2-a04dacb4e77f
-# ╠═2bc4b9de-c5e1-4bdb-832c-f6c849b0dc3d
-# ╠═3e67f206-6c54-4406-b431-8e0dc70cc862
-# ╠═7af0447f-aca2-45b0-ac1c-5d359ec25b3a
-# ╠═85271f34-f54c-4f94-be61-46db68d4be3c
-# ╠═56c4d260-3d8d-4c83-8f5a-283878c76d9b
-# ╠═f92f1115-fd00-4521-9f0b-05a5f51b386e
 # ╟─8a2af572-4a87-4f30-a031-56efbda43a70
 # ╠═3b75ae00-df1a-497b-8553-cec55597fb46
 # ╠═547313be-fc25-4868-9331-428976ae14ad
