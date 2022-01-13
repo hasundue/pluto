@@ -210,7 +210,7 @@ md"## Plotting results"
             end
 
             # Calculate infiltration length
-            ls[k], _ = romberg(range[2:end], sol.u[i][2M+1:3M])
+            ls[k], _ = romberg(range[2:end-1], sol.u[i][2M+1:3M])
 
             k += 1
         end
