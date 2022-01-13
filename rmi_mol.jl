@@ -63,7 +63,7 @@ k = 10 # infiltrativity parameter
 ev(c, u) = v * (1-c) * u # evaporation
 
 # ╔═╡ f9d3a857-5fca-4329-ad6e-3a0ab4a53331
-cg(c, s) = r * c^2 * (1-s)^2 # crystal growth
+cg(c, s) = r * c * (1-s) # crystal growth
 
 # ╔═╡ 471e3c14-33ae-4103-8586-41385073f230
 cp(s) = 1 + erf((s-1)/w) # relative capillary pressure
@@ -74,6 +74,9 @@ eqs = [
     Dt(s(t,x)) ~ cg(c(t,x), s(t,x)),
     Dt(u(t,x)) ~ Dx(k*cp(s(t,x))*Dx(u(t,x))),
 ]
+
+# ╔═╡ 59d5fcdd-28cf-44ce-8bd3-bd790c095852
+plot(cp, 0, 1)
 
 # ╔═╡ b084b8bd-2fe6-4d38-9090-34613ef41842
 bcs = [
@@ -165,6 +168,7 @@ plot(0:dx:1, sol)
 # ╠═84ff092f-bde9-4696-91c9-5a5b97a20cde
 # ╠═f9d3a857-5fca-4329-ad6e-3a0ab4a53331
 # ╠═471e3c14-33ae-4103-8586-41385073f230
+# ╠═59d5fcdd-28cf-44ce-8bd3-bd790c095852
 # ╠═b084b8bd-2fe6-4d38-9090-34613ef41842
 # ╠═25ad6ce3-86fc-478f-b957-66857422e2b9
 # ╠═1b5c9ffb-70d5-45d8-9042-4892df89008c
