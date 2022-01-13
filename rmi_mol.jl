@@ -98,8 +98,8 @@ eqs = [
 ]
 
 # ╔═╡ 59d5fcdd-28cf-44ce-8bd3-bd790c095852
-plot(s -> cp(0.3, s), 0, 1,
-     legend = false,
+plot([s -> cp(w, s) for w in [10, 1, 0.1]], 0, 1,
+     labels = map(w -> "w = " * w, ["10" "1" "0.1"]),
      xlabel = "Surface coverage",
      ylabel = "capillary pressure")
 
