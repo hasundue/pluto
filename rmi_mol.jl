@@ -42,14 +42,14 @@ md"## Definition of variables and parameters"
 @parameters t x
 
 # ╔═╡ ff609196-76d6-4aba-9971-81835f800271
-# c: gas concentration
+# c: vapor concentration
 # s: surface coverage
 # u: liquid volume fraction
 # d: thickness of the product at liquid/substrate interface
 @variables c(..) s(..) u(..) d(..)
 
 # ╔═╡ 8c562f00-b437-4455-b3c2-a04dacb4e77f
-δ = 0.1 # thickness of VW-like crystals at gas/substrate interface
+δ = 0.1 # thickness of VW-like crystals at vapor/substrate interface
 
 # ╔═╡ 2bc4b9de-c5e1-4bdb-832c-f6c849b0dc3d
 r = 10 # crystal growth rate
@@ -58,7 +58,7 @@ r = 10 # crystal growth rate
 v = 10 # evaporation rate
 
 # ╔═╡ 7af0447f-aca2-45b0-ac1c-5d359ec25b3a
-D = 0.1 # gas diffusion coeffient
+D = 0.1 # vapor diffusion coeffient
 
 # ╔═╡ 85271f34-f54c-4f94-be61-46db68d4be3c
 w = 0.3 # wettability parameter
@@ -85,7 +85,7 @@ Dt = Differential(t)
 ev(c, u) = v * (1-c) * u # evaporation model
 
 # ╔═╡ f9d3a857-5fca-4329-ad6e-3a0ab4a53331
-vw(c, s) = r * c * (1-s) # VW-like crystal growth at gas/substrate interface
+vw(c, s) = r * c * (1-s) # VW-like crystal growth at vapor/substrate interface
 
 # ╔═╡ 471e3c14-33ae-4103-8586-41385073f230
 cp(s) = 1 + erf((s-1)/w) # capillary pressure model
