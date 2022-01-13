@@ -4,6 +4,12 @@
 using Markdown
 using InteractiveUtils
 
+# ╔═╡ aef53a73-6a16-4259-bb35-1d9d735313a0
+md"# Mathematical modeling of reactive melt infiltration (RMI)"
+
+# ╔═╡ 8626400d-31e7-4b19-af63-47115eb893c7
+md"## Setting up Julia language"
+
 # ╔═╡ 421056b1-5fd8-4a43-b9f9-29ab6655f01e
 begin
     import Pkg
@@ -28,12 +34,6 @@ begin
     using ModelingToolkit, SpecialFunctions, MethodOfLines, OrdinaryDiffEq
     using Plots, RecipesBase, Printf, Romberg
 end
-
-# ╔═╡ aef53a73-6a16-4259-bb35-1d9d735313a0
-md"# Mathematical modeling of reactive melt infiltration (RMI)"
-
-# ╔═╡ 8626400d-31e7-4b19-af63-47115eb893c7
-md"## Setting up Julia language"
 
 # ╔═╡ bf11b1e1-0459-4c9e-b2a2-cf325f6b7552
 md"## Definition of variables and parameters"
