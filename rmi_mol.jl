@@ -52,11 +52,11 @@ md"## Definition of variables and parameters"
 # δ: thickness of VW-like crystals at vapor/substrate interface
 # r: crystal growth rate
 # v: evaporation rate
-# D: vapor diffusion coeffient
+# D_gas: vapor diffusion coeffient
 # w: wettability parameter
 # k: permeability parameter
 # D_fm: Reaction constant for FM-like reaction at liquid/substrate interface
-@parameters δ, r, v, D, w, k, D_fm
+@parameters δ, r, v, D_gas, w, k, D_fm
 
 # ╔═╡ 8a2af572-4a87-4f30-a031-56efbda43a70
 md"## Governing equations"
@@ -85,7 +85,7 @@ fm(u, d) = u * D_fm / d # FM-like crystal growth at liquid/substrate interface
 # ╔═╡ ca6af1e9-2bf5-4751-aa95-8b685f4bb987
 eqs = [
     # Gas concentration
-    Dt(c(t,x)) ~ D * Dxx(c(t,x)) - δ * vw(c(t,x), s(t,x)) + ev(c(t,x), u(t,x)),
+    Dt(c(t,x)) ~ D_gas * Dxx(c(t,x)) - δ * vw(c(t,x), s(t,x)) + ev(c(t,x), u(t,x)),
 
     # Surface coverage
     Dt(s(t,x)) ~ vw(c(t,x), s(t,x)),
@@ -138,13 +138,13 @@ domains = [t ∈ (0.0, 1.0),
                        domains, 
                        [t,x], 
                        [c(t,x), s(t,x), u(t,x), d(t,x)],
-                       [δ => 0.1, # thickness of VW-like reaction
-                        r => 10, # crystal growth rate
-                        v => 40, # evaporation rate
-                        D => 0.01, # vapor diffusion coeffient
-                        w => 0.3, # wettability parameter
-                        k => 10, # permeability parameter
-                        D_fm => 10]); # Reaction constant for FM-like reaction
+                       [δ => 0.1,       # thickness of VW-like reaction
+                        r => 10,        # crystal growth rate
+                        v => 40,        # evaporation rate
+                        D_gas => 0.01,  # vapor diffusion coeffient
+                        w => 0.3,       # wettability parameter
+                        k => 10,        # permeability parameter
+                        D_fm => 10]);   # Reaction constant for FM-like reaction
 
 # ╔═╡ 4860b5f5-dcb8-40ca-b378-702bcfb40738
 dx = 0.01
